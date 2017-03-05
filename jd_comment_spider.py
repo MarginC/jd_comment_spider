@@ -10,21 +10,34 @@ import time
 
 def gen_url(productId, page, pageSize=10, score=0):
     domain = 'http://club.jd.com/comment/productPageComments.action'
-    params = 'productId={0}&score={1}&sortType=5&page={2}&pageSize={3}'.format(productId, score, page, pageSize)
+    params = 'productId={0}&score={1}&sortType=5&page={2}&pageSize={3}&isShadowSku=0'.\
+        format(productId, score, page, pageSize)
     _url = domain + '?' + params
     return _url
 
 
 def get_json(productId, page, pageSize, score):
     _url = gen_url(productId, page, pageSize, score)
-    _html = urllib.request.urlopen(_url).read().decode(encoding='gbk', errors='strict')
-    _json = json.loads(_html, encoding='gbk')
+    _json = None
+    try:
+        _html = urllib.request.urlopen(_url).read().decode(encoding='gbk', errors='ignore')
+        _json = json.loads(_html, encoding='gbk')
+    except Exception as e:
+        print(_url)
     return _json
 
 
-def get_summary(productId):
+def get_pages(productId):
     _json = get_json(productId, 0, 1, 0)
-    return _json['productCommentSummary']
+    return _json['maxPage']
+
+
+def get_comments(productId, page):
+    _json = get_json(productId, page, 10, 0)
+    if _json:
+        return _json['comments']
+    else:
+        return None
 
 
 def get_evaluation(score):
@@ -34,11 +47,6 @@ def get_evaluation(score):
         return '中评'
     else:
         return '差评'
-
-
-def get_comments(productId, page):
-    _json = get_json(productId, page, 10, 0)
-    return _json['comments']
 
 
 def write_headers(_file, _headers):
@@ -65,18 +73,26 @@ def write_file(referenceId):
                    'evaluation', 'creationTime', 'referenceTime', 'days', 'referenceId', 'content')
         write_headers(file, headers)
 
+        retries = 0
+        maxRetries = 5
         page = 0
-        while True:
-            try:
-                comments = get_comments(referenceId, page)
+        maxPage = int(get_pages(referenceId))
+        while page < maxPage:
+            comments = get_comments(referenceId, page)
+            if comments:
+                retries = 0
                 if len(comments) > 0:
                     write_comments(file, headers, comments)
                     count += len(comments)
+                    page += 1
                 else:
                     break
-            except Exception as e:
-                print(e)
-            page += 1
+            else:
+                if retries < maxRetries:
+                    time.sleep(5)
+                    retries += 1
+                else:
+                    page += 1
     return count
 
 
@@ -91,7 +107,10 @@ class JDThread(threading.Thread):
         self.count = 0
 
     def run(self):
+        print('{0} crawls start at {1}'.format(self.referenceId, get_time()))
         self.count = write_file(self.referenceId)
+        print('{0} crawled {1} comments stop at {2}'.
+              format(self.referenceId, self.count, get_time()))
 
     def get_result(self):
         return self.count
@@ -104,15 +123,8 @@ def main():
     for referenceId in referenceIds:
         threads[referenceId] = JDThread(referenceId)
         threads[referenceId].start()
-        print('{0} start at {1}'.format(referenceId, get_time()))
-    while len(referenceIds):
-        for referenceId in referenceIds:
-            threads[referenceId].join(5)
-            if not threads[referenceId].isAlive():
-                referenceIds = [i for i in referenceIds if i != referenceId]
-                print('{0} crawled {1} comments, stop at {2}'.
-                      format(referenceId, threads[referenceId].get_result(), get_time()))
-                break;
+    for referenceId in referenceIds:
+        threads[referenceId].join()
     print('main process finish at {0}'.format(get_time()))
 
 
