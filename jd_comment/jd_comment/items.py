@@ -18,6 +18,7 @@ class JdGoodsList(scrapy.Item):
 class JdGoodsSummary(scrapy.Item):
     referenceId = scrapy.Field()
     maxPages = scrapy.Field()
+    summary = scrapy.Field()
     pass
 
 

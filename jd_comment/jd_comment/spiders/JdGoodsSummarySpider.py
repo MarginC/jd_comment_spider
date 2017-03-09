@@ -23,17 +23,23 @@ class JdgoodssummarySpider(scrapy.Spider):
                 goods = json.loads(line)
                 url = self.__generateUrl(goods['referenceId'])
                 print(url)
-                yield scrapy.Request(url, meta={'referenceId': goods['referenceId']}, callback=self.parseGoodsSummary)
+                yield scrapy.Request(url, meta={'referenceId': goods['referenceId']}, 
+                    callback=self.parseGoodsSummary)
 
     def parseGoodsSummary(self, response):
         try:
             summary = json.loads(response.text)
+        except Exception as e:
+            yield scrapy.Request(url, meta={'referenceId': response.meta['referenceId']},
+                callback=self.parseGoodsSummary)
+        try:
             del summary['comments']
             del summary['hotCommentTagStatistics']
-            item = JdGoodsSummary()
-            item['referenceId'] = response.meta['referenceId']
-            item['summary'] = summary
-            yield item
-         except Exception as e:
+            del summary['vTagStatistics']
+        except Exception as e:
             pass
-
+        item = JdGoodsSummary()
+        item['referenceId'] = response.meta['referenceId']
+        item['maxPages'] = summary['maxPage']
+        item['summary'] = summary
+        yield item
