@@ -11,6 +11,7 @@ import scrapy
 class JdGoodsList(scrapy.Item):
     name = scrapy.Field()
     url = scrapy.Field()
+    referenceId = scrapy.Field()
     pass
 
 
