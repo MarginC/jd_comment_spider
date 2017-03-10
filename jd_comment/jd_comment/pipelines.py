@@ -20,7 +20,7 @@ class JdGoodsListPipeline(object):
         item['referenceId'] = match.group(1)
         line = json.dumps(dict(item), ensure_ascii=False) + '\n'
         self.file.write(line)
-        return item
+        pass
 
     def close_spider(self, spider):
         self.file.close()
@@ -33,7 +33,20 @@ class JdGoodsSummaryPipeline(object):
     def process_item(self, item, spider):
         line = json.dumps(dict(item), ensure_ascii=False) + '\n'
         self.file.write(line)
-        return item
+        pass
+
+    def close_spider(self, spider):
+        self.file.close()
+
+
+class JdGoodsPricePipeline(object):
+    def __init__(self):
+        self.file = codecs.open('jd_goods_price.json', 'w', encoding='utf-8')
+
+    def process_item(self, item, spider):
+        line = json.dumps(dict(item), ensure_ascii=False) + '\n'
+        self.file.write(line)
+        pass
 
     def close_spider(self, spider):
         self.file.close()
@@ -44,7 +57,9 @@ class JdCommentPipeline(object):
         self.file = codecs.open('jd_comment.json', 'w', encoding='utf-8')
 
     def process_item(self, item, spider):
-        return item
+        line = json.dumps(dict(item), ensure_ascii=False) + '\n'
+        self.file.write(line)
+        pass
 
     def close_spider(self, spider):
         self.file.close()

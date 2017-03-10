@@ -8,17 +8,25 @@
 import scrapy
 
 
-class JdGoodsList(scrapy.Item):
+class JdGoodsListItem(scrapy.Item):
+    referenceId = scrapy.Field()
     name = scrapy.Field()
     url = scrapy.Field()
-    referenceId = scrapy.Field()
     pass
 
 
-class JdGoodsSummary(scrapy.Item):
+class JdGoodsSummaryItem(scrapy.Item):
     referenceId = scrapy.Field()
-    maxPages = scrapy.Field()
+    maxPage = scrapy.Field()
     summary = scrapy.Field()
+    pass
+
+
+class JdGoodsPriceItem(scrapy.Item):
+    referenceId = scrapy.Field()
+    price = scrapy.Field()
+    m = scrapy.Field()
+    op = scrapy.Field()
     pass
 
 
@@ -27,7 +35,7 @@ class JdCommentItem(scrapy.Item):
     # name = scrapy.Field()
     commentId = scrapy.Field()
     content = scrapy.Field()
-    createTime = scrapy.Field()
+    creationTime = scrapy.Field()
     referenceId = scrapy.Field()
     referenceName = scrapy.Field()
     referenceTime = scrapy.Field()
@@ -38,9 +46,10 @@ class JdCommentItem(scrapy.Item):
     userClient = scrapy.Field()
     userLevelName = scrapy.Field()
     plusAvailable = scrapy.Field()
-    recommand = scrapy.Field()
+    recommend = scrapy.Field()
     userClientShow = scrapy.Field()
     isMobile = scrapy.Field()
     days = scrapy.Field()
     afterDays = scrapy.Field()
+    hAfterUserComment = scrapy.Field()
     pass

@@ -27,7 +27,7 @@ ROBOTSTXT_OBEY = True
 # Configure a delay for requests for the same website (default: 0)
 # See http://scrapy.readthedocs.org/en/latest/topics/settings.html#download-delay
 # See also autothrottle settings and docs
-#DOWNLOAD_DELAY = 3
+DOWNLOAD_DELAY = 3
 # The download delay setting will honor only one of:
 #CONCURRENT_REQUESTS_PER_DOMAIN = 16
 #CONCURRENT_REQUESTS_PER_IP = 16
@@ -39,10 +39,12 @@ ROBOTSTXT_OBEY = True
 #TELNETCONSOLE_ENABLED = False
 
 # Override the default request headers:
-#DEFAULT_REQUEST_HEADERS = {
-#   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-#   'Accept-Language': 'en',
-#}
+DEFAULT_REQUEST_HEADERS = {
+   'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+   'Accept-Encoding': 'gzip, deflate, sdch',
+   'Accept-Language': 'zh-CN,zh;q=0.8,en;q=0.6',
+   'user-agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36',
+}
 
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
@@ -52,9 +54,16 @@ ROBOTSTXT_OBEY = True
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
+
 #DOWNLOADER_MIDDLEWARES = {
-#    'jd_comment.middlewares.MyCustomDownloaderMiddleware': 543,
+#    'scrapy.downloadermiddlewares.downloadtimeout.DownloadTimeoutMiddleware': 350,
+#    'jd_comment.HttpProxyMiddleware.HttpProxyMiddleware': 543,
+#    'scrapy.contrib.downloadermiddleware.retry.RetryMiddleware': 351,
+    # put this middleware after RetryMiddleware
+#    'crawler.middleware.HttpProxyMiddleware': 999,
 #}
+
+#DOWNLOAD_TIMEOUT = 10           # 10-15 second is an experienmental reasonable timeout
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html

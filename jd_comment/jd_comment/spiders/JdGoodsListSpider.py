@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import scrapy
 from scrapy.selector import Selector
-from jd_comment.items import JdGoodsList
+from jd_comment.items import JdGoodsListItem
 
 class JdgoodslistSpider(scrapy.Spider):
     name = "JdGoodsList"
@@ -37,7 +37,7 @@ class JdgoodslistSpider(scrapy.Spider):
     def parseGoodsList(self, response):
         lis = response.xpath('//div[@class="ml-wrap"]/div[@id="plist"]/ul/li[@class="gl-item"]/div')
         for sel in lis:
-            item = JdGoodsList()
+            item = JdGoodsListItem()
             try:
                 item['name'] = sel.xpath('div[@class="p-name"]/a/em/text()').extract()[0]
                 item['url'] = 'http:' + sel.xpath('div[@class="p-name"]/a/@href').extract()[0]
