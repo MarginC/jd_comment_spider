@@ -2,6 +2,7 @@
 import scrapy
 from proxy.items import ProxyItem
 
+
 class UsproxySpider(scrapy.Spider):
     name = "usproxy"
     allowed_domains = ["https://www.us-proxy.org/"]
@@ -19,6 +20,7 @@ class UsproxySpider(scrapy.Spider):
                 item['ipAddress'] = tr.xpath('td/text()')[0].extract()
                 item['port'] = tr.xpath('td/text()')[1].extract()
             except Exception as e:
+                print(e)
                 continue
             try:
                 item['code'] = tr.xpath('td/text()')[2].extract()
@@ -27,6 +29,6 @@ class UsproxySpider(scrapy.Spider):
                 item['google'] = tr.xpath('td/text()')[5].extract()
                 item['https'] = tr.xpath('td/text()')[6].extract()
                 item['lastChecked'] = tr.xpath('td/text()')[7].extract()
-            except Exception as e:
+            except:
                 pass
             yield item

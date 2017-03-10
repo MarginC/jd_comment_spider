@@ -70,7 +70,7 @@ DOWNLOADER_MIDDLEWARES = {
 # http://username:password@host2:port
 # http://host3:port
 # ...
-PROXY_LIST = './proxy/proxy_list_valid'
+PROXY_LIST = './proxy/proxy/proxy_valid_list'
 
 # Proxy mode
 # 0 = Every requests have different proxy

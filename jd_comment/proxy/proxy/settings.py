@@ -16,7 +16,7 @@ NEWSPIDER_MODULE = 'proxy.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'proxy (+http://www.yourdomain.com)'
+#USER_AGENT = 'proxy (+http://45.78.25.176:8000)'
 
 # Obey robots.txt rules
 #ROBOTSTXT_OBEY = True
@@ -88,3 +88,8 @@ NEWSPIDER_MODULE = 'proxy.spiders'
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+
+REDIS_IP = '192.168.42.43'
+REDIS_PORT = 6379
+REDIS_PROXY_LIST_KEY = 'proxy_list'
+REDIS_PROXY_VALID_LIST_KEY = 'proxy_valid_list'
