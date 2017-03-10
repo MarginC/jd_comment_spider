@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import scrapy
 import json
-from scrapy.selector import Selector
+import redis
 from jd_comment.items import JdCommentItem
+from scrapy.utils.project import get_project_settings
+
 
 class JdcommentSpider(scrapy.Spider):
     name = "JdComment"
@@ -14,31 +16,30 @@ class JdcommentSpider(scrapy.Spider):
     }
     set_name = 'comment_urls'
 
-    def __generateUrl(self, referenceId, page):
-        return 'http://club.jd.com/comment/productPageComments.action?productId={0}&score=0&sortType=5&page={1}&pageSize=10'.format(referenceId, page)
-
     def start_requests(self):
-        with open('jd_goods_summary.json') as f:
-            for line in f.readlines():
-                goods = json.loads(line)
-                referenceId = goods['referenceId']
-                maxPage = goods['maxPage']
-                for page in range(int(maxPage)):
-                    url = self.__generateUrl(referenceId, page)
-                    yield scrapy.Request(url, meta={'maxPage': maxPage, 'page': page}, callback=self.parseComment)
+        settings = get_project_settings()
+        self.redis = redis.Redis(
+            host=settings.get('REDIS_IP'), port=settings.get('REDIS_PORT'))
+        self.comment_task = settings.get('REDIS_COMMENT_TASK_KEY',
+            'jd_comment_task')
+        for task in self.redis.smemembers(self.comment_task):
+            _json = json.loads(task)
+            yield scrapy.Request(_json['url'],
+                meta={'maxPage': _json['maxPage'], 'page': _json['page']},
+                callback=self.parseComment)
 
     def parseComment(self, response):
         comments = []
         try:
             summary = json.loads(response.text)
             comments = summary['comments']
-        except Exception as e:
-            response.request.dont_filter=True
+        except:
+            response.request.dont_filter = True
             yield response.request
         page = response.meta['page']
         maxPage = response.meta['maxPage']
         if len(comments) == 0 and int(page) < int(maxPage):
-            response.request.dont_filter=True
+            response.request.dont_filter = True
             yield response.request
         for comment in comments:
             item = JdCommentItem()
@@ -60,8 +61,8 @@ class JdcommentSpider(scrapy.Spider):
             item['isMobile'] = comment['isMobile']
             item['days'] = comment['days']
             item['afterDays'] = comment['afterDays']
-            try: 
-               item['hAfterUserComment'] = comment['hAfterUserComment']
-            except Exception as e:
+            try:
+                item['hAfterUserComment'] = comment['hAfterUserComment']
+            except:
                 pass
             yield item
