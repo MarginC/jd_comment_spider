@@ -10,7 +10,7 @@ class JdgoodslistSpider(scrapy.Spider):
             'ITEM_PIPELINES': {
             'jd_comment.pipelines.JdGoodsListPipeline': 1,
          }
-     }
+    }
     cat_list_file = 'cat_list'
     start_page = 1
     end_page = 10

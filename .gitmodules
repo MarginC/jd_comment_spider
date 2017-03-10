@@ -1,0 +1,3 @@
+[submodule "jd_comment/proxy-filter"]
+	path = jd_comment/proxy-filter
+	url = https://github.com/wstierhout/proxy-filter.git

@@ -33,10 +33,12 @@ class JdcommentSpider(scrapy.Spider):
             summary = json.loads(response.text)
             comments = summary['comments']
         except Exception as e:
+            response.request.dont_filter=True
             yield response.request
         page = response.meta['page']
         maxPage = response.meta['maxPage']
         if len(comments) == 0 and int(page) < int(maxPage):
+            response.request.dont_filter=True
             yield response.request
         for comment in comments:
             item = JdCommentItem()
