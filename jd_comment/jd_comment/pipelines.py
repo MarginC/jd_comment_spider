@@ -9,21 +9,30 @@ import json
 import codecs
 import re
 import redis
+from scrapy.utils.project import get_project_settings
 
 
 class JdGoodsListPipeline(object):
     def __init__(self):
-        self.file = codecs.open('jd_goods_list.json', 'w', encoding='utf-8')
+        settings = get_project_settings()
+        self.redis = redis.Redis(
+            host=settings.get('REDIS_IP'), port=settings.get('REDIS_PORT'))
+        try:
+            self.goods_list = settings.get('REDIS_GOODS_LIST_KEY')
+        except:
+            self.goods_list = 'jd_goods_list'
+        pass
 
     def process_item(self, item, spider):
         match = re.match(r'^http://item.jd.com/(\d+)\.html', item['url'])
         item['referenceId'] = match.group(1)
-        line = json.dumps(dict(item), ensure_ascii=False) + '\n'
-        self.file.write(line)
+        self.redis.sadd(self.goods_list,
+            json.dumps(dict(item), ensure_ascii=False))
         pass
 
     def close_spider(self, spider):
-        self.file.close()
+        self.redis.save()
+        pass
 
 
 class JdGoodsSummaryPipeline(object):
