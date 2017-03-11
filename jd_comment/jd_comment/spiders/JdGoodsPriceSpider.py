@@ -20,22 +20,23 @@ class JdgoodspriceSpider(scrapy.Spider):
         self.redis = redis.Redis(
             host=settings.get('REDIS_IP'), port=settings.get('REDIS_PORT'))
         self.price_task = settings.get('REDIS_PRICE_TASK_KEY', 'jd_price_task')
-        for task in self.redis.smemembers(self.price_task):
+        for task in self.redis.smembers(self.price_task):
             _json = json.loads(task)
             yield scrapy.Request(_json['url'],
                 meta={'referenceId': _json['referenceId']},
                 callback=self.parseGoodsPrice)
 
     def parseGoodsPrice(self, response):
+        item = JdGoodsPriceItem()
+        item['referenceId'] = response.meta['referenceId']
         try:
-            price = json.loads(response.text)[0]
+            price = json.loads(response.text)
+            price = price[0]
+            item['price'] = price['p']
+            item['m'] = price['m']
+            item['op'] = price['op']
         except:
             yield scrapy.Request(response.url,
                 meta={'referenceId': response.meta['referenceId']},
                 dont_filter=True, callback=self.parseGoodsPrice)
-        item = JdGoodsPriceItem()
-        item['referenceId'] = response.meta['referenceId']
-        item['price'] = price['p']
-        item['m'] = price['m']
-        item['op'] = price['op']
         yield item

@@ -22,7 +22,7 @@ class JdcommentSpider(scrapy.Spider):
             host=settings.get('REDIS_IP'), port=settings.get('REDIS_PORT'))
         self.comment_task = settings.get('REDIS_COMMENT_TASK_KEY',
             'jd_comment_task')
-        for task in self.redis.smemembers(self.comment_task):
+        for task in self.redis.smembers(self.comment_task):
             _json = json.loads(task)
             yield scrapy.Request(_json['url'],
                 meta={'maxPage': _json['maxPage'], 'page': _json['page']},

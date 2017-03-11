@@ -21,7 +21,7 @@ class JdgoodssummarySpider(scrapy.Spider):
             host=settings.get('REDIS_IP'), port=settings.get('REDIS_PORT'))
         self.summary_task = settings.get('REDIS_SUMMARY_TASK_KEY',
             'jd_summary_task')
-        for task in self.redis.smemembers(self.summary_task):
+        for task in self.redis.smembers(self.summary_task):
             _json = json.loads(task)
             yield scrapy.Request(_json['url'],
                 meta={'referenceId': _json['referenceId']},
