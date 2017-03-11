@@ -17,9 +17,9 @@ class Proxydb(scrapy.Spider):
     }
 
     def __generateUrl(self, offset):
-        return 'http://proxydb.net/?protocol=http&protocol=https' \
+        return 'http://proxydb.net/?protocol=http' \
             '&anonlvl=2&anonlvl=3&anonlvl=4&country=CN&' \
-            'availability=75&response_time=10&offset={0}'.format(offset)
+            'availability=90&response_time=10&offset={0}'.format(offset)
 
     def parse(self, response):
         num = response.xpath('//div/form/small/text()').extract()[0]
