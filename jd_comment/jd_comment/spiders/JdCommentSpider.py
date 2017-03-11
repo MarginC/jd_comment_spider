@@ -22,25 +22,31 @@ class JdcommentSpider(scrapy.Spider):
             host=settings.get('REDIS_IP'), port=settings.get('REDIS_PORT'))
         self.comment_task = settings.get('REDIS_COMMENT_TASK_KEY',
             'jd_comment_task')
-        for task in self.redis.smembers(self.comment_task):
+        while True:
+            task = self.redis.spop(self.comment_task)
+            if not task:
+                break
             _json = json.loads(task)
             yield scrapy.Request(_json['url'],
                 meta={'maxPage': _json['maxPage'], 'page': _json['page']},
                 callback=self.parseComment)
 
     def parseComment(self, response):
-        comments = []
+        page = response.meta['page']
+        maxPage = response.meta['maxPage']
         try:
             summary = json.loads(response.text)
             comments = summary['comments']
+            if comments is None and int(page) < int(maxPage):
+                self.redis.sadd(self.comment_task, json.dumps(
+                    {'maxPage': maxPage, 'page': page, 'url': response.url}, 
+                    ensure_ascii=False))
+                return 
         except:
-            response.request.dont_filter = True
-            yield response.request
-        page = response.meta['page']
-        maxPage = response.meta['maxPage']
-        if len(comments) == 0 and int(page) < int(maxPage):
-            response.request.dont_filter = True
-            yield response.request
+            self.redis.sadd(self.comment_task, json.dumps(
+                {'maxPage': maxPage, 'page': page, 'url': response.url}, 
+                ensure_ascii=False))
+            return
         for comment in comments:
             item = JdCommentItem()
             item['commentId'] = comment['id']
@@ -48,7 +54,10 @@ class JdcommentSpider(scrapy.Spider):
             item['creationTime'] = comment['creationTime']
             item['referenceId'] = comment['referenceId']
             item['referenceName'] = comment['referenceName']
-            item['referenceTime'] = comment['referenceTime']
+            try:
+                item['referenceTime'] = comment['referenceTime']
+            except:
+                pass
             item['score'] = comment['score']
             item['userLevelId'] = comment['userLevelId']
             item['userProvince'] = comment['userProvince']
